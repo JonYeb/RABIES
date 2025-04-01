@@ -1,4 +1,4 @@
-# Resize And Batch Images (RABIES)
+# Resize And Batch ImagES (RABIES)
 
 This project provides a Python script to resize images and upload them to a Google Cloud Storage bucket. It includes instructions for setting up a virtual environment, managing dependencies, and configuring Google Cloud credentials.
 
