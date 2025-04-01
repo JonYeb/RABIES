@@ -33,5 +33,7 @@ rabies/
 *.jpg
 *.jpeg
 
+1.txt
+
 # Credentials and secrets
 *.json

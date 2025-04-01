@@ -3,7 +3,15 @@ import sys
 import os
 import re
 from datetime import datetime
-from dotenv import load_dotenv  # Import the dotenv library
+from dotenv import load_dotenv # Import the dotenv library
+from google.cloud import storage  # Import Google Cloud Storage library
+
+# Load environment variables from .env
+load_dotenv()
+
+# Access the credentials path
+credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+print(f"Using credentials from: {credentials_path}")
 
 def resize_image(input_path, output_path, max_dimension):
     """
@@ -45,6 +53,24 @@ def extract_date_from_filename(filename):
     match = re.search(r"(\d{4}-\d{2}-\d{2})", filename)
     return match.group(1) if match else None
 
+def upload_to_bucket(bucket_name, source_file_path, destination_blob_name):
+    """
+    Uploads a file to a Google Cloud Storage bucket.
+
+    :param bucket_name: Name of the Google Cloud Storage bucket.
+    :param source_file_path: Path to the file to upload.
+    :param destination_blob_name: Name of the file in the bucket.
+    """
+    try:
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(destination_blob_name)
+
+        blob.upload_from_filename(source_file_path)
+        print(f"File {source_file_path} uploaded to {bucket_name}/{destination_blob_name}.")
+    except Exception as e:
+        print(f"Error uploading file to bucket: {e}")
+
 if __name__ == "__main__":
     # Load environment variables from .env file
     load_dotenv()
@@ -80,5 +106,12 @@ if __name__ == "__main__":
     # Set the output path to 1.jpg
     output_path = "1.jpg"
 
+    # Resize the image
     resize_image(input_path, output_path, max_dimension)
+
+    # Upload files to Google Cloud Storage bucket
+    bucket_name = os.getenv("GCS_BUCKET_NAME", "your-bucket-name")  # Replace with your bucket name or set in .env
+    upload_to_bucket(bucket_name, "1.jpg", "1.jpg")
+    upload_to_bucket(bucket_name, "1.txt", "1.txt")
+
     input("Press Enter to exit...")
