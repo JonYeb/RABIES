@@ -1,0 +1,20 @@
+# Ignore environment variable files
+.env
+
+# Ignore build output
+dist/
+build/
+
+# Ignore dependency directories
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Ignore system files
+Thumbs.db
+*.bak
+*.tmp
+
+# Ignore Git files
+.git/
