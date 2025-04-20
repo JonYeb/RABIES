@@ -37,3 +37,4 @@ rabies/
 
 # Credentials and secrets
 *.json
+RABIES.code-workspace
