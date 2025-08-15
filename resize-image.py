@@ -6,13 +6,6 @@ from datetime import datetime
 from dotenv import load_dotenv # Import the dotenv library
 from google.cloud import storage  # Import Google Cloud Storage library
 
-# Load environment variables from .env
-load_dotenv()
-
-# Access the credentials path
-credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-print(f"Using credentials from: {credentials_path}")
-
 def resize_image(input_path, output_path, max_dimension):
     """
     Resizes an image to fit within a maximum dimension while preserving aspect ratio.
@@ -71,6 +64,82 @@ def upload_to_bucket(bucket_name, source_file_path, destination_blob_name):
     except Exception as e:
         print(f"Error uploading file to bucket: {e}")
 
+def increment_files_in_bucket(bucket_name, max_files):
+    """
+    Increments all files in the bucket, shifting them up by one index.
+    Removes the file with the highest index if it exceeds max_files.
+    
+    :param bucket_name: Name of the Google Cloud Storage bucket.
+    :param max_files: Maximum number of files to keep.
+    :return: True if successful, False otherwise.
+    """
+    try:
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        
+        # Get list of image files
+        image_blobs = []
+        for blob in bucket.list_blobs():
+            if blob.name.endswith('.jpg') and blob.name[:-4].isdigit():
+                image_blobs.append(blob)
+        
+        # Sort by numeric filename
+        image_blobs.sort(key=lambda x: int(x.name[:-4]))
+        
+        # Start from the highest number and increment
+        for i in range(len(image_blobs)-1, -1, -1):
+            blob = image_blobs[i]
+            current_num = int(blob.name[:-4])
+            new_num = current_num + 1
+            
+            # Delete if exceeding max files
+            if new_num > max_files:
+                print(f"Deleting {blob.name} as it would exceed the maximum file limit.")
+                blob.delete()
+                continue
+            
+            # Copy to new name
+            new_name = f"{new_num}.jpg"
+            bucket.copy_blob(blob, bucket, new_name)
+            print(f"Renamed {blob.name} to {new_name}")
+            
+            # Delete the old one
+            blob.delete()
+        
+        # Do the same for text files
+        text_blobs = []
+        for blob in bucket.list_blobs():
+            if blob.name.endswith('.txt') and blob.name[:-4].isdigit():
+                text_blobs.append(blob)
+        
+        # Sort by numeric filename
+        text_blobs.sort(key=lambda x: int(x.name[:-4]))
+        
+        # Start from the highest number and increment
+        for i in range(len(text_blobs)-1, -1, -1):
+            blob = text_blobs[i]
+            current_num = int(blob.name[:-4])
+            new_num = current_num + 1
+            
+            # Delete if exceeding max files
+            if new_num > max_files:
+                print(f"Deleting {blob.name} as it would exceed the maximum file limit.")
+                blob.delete()
+                continue
+            
+            # Copy to new name
+            new_name = f"{new_num}.txt"
+            bucket.copy_blob(blob, bucket, new_name)
+            print(f"Renamed {blob.name} to {new_name}")
+            
+            # Delete the old one
+            blob.delete()
+        
+        return True
+    except Exception as e:
+        print(f"Error incrementing files in bucket: {e}")
+        return False
+
 if __name__ == "__main__":
     # Load environment variables from .env file
     load_dotenv()
@@ -84,9 +153,10 @@ if __name__ == "__main__":
         print(f"Error: Input file '{input_path}' does not exist.")
         sys.exit(1)
 
-    # Read max_dimension from .env file, default to 500 if not set
-    max_dimension = int(os.getenv("MAX_DIMENSION", 500))
-
+    # Read max_dimension and max_files from .env file
+    max_dimension = int(os.getenv("MAX_DIMENSION", 500)) # Default to 500 if not set
+    max_files = int(os.getenv("MAX_FILES", 10))  # Default to 10 if not set
+    
     # Extract the date from the input filename
     input_filename = os.path.basename(input_path)
     extracted_date = extract_date_from_filename(input_filename)
@@ -109,8 +179,18 @@ if __name__ == "__main__":
     # Resize the image
     resize_image(input_path, output_path, max_dimension)
 
-    # Upload files to Google Cloud Storage bucket
-    bucket_name = os.getenv("GCS_BUCKET_NAME", "your-bucket-name")  # Replace with your bucket name or set in .env
+    # Get bucket name from .env
+    bucket_name = os.getenv("GCS_BUCKET_NAME", "your-bucket-name")
+    
+    # Increment existing files in the bucket
+    print(f"Incrementing existing files in bucket '{bucket_name}'...")
+    if increment_files_in_bucket(bucket_name, max_files):
+        print("Files incremented successfully.")
+    else:
+        print("Failed to increment files. Continuing with upload...")
+    
+    # Upload the new files as 1.jpg and 1.txt
+    print("Uploading new files...")
     upload_to_bucket(bucket_name, "1.jpg", "1.jpg")
     upload_to_bucket(bucket_name, "1.txt", "1.txt")
 
