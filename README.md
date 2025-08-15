@@ -1,6 +1,8 @@
 # Resize And Batch ImagES (RABIES)
 
-This project provides a Python script to resize images and upload them to a Google Cloud Storage bucket. It includes instructions for setting up a virtual environment, managing dependencies, and configuring Google Cloud credentials.
+This project provides a Python script to resize images and upload them to a Google Cloud Storage bucket. It includes instructions for setting up a virtual environment, managing dependencies, and configuring Google Cloud credentials.  
+
+I made it to use with VRChat and its image loader which limits max resolution to 2000px. So I can have a static URL with changing pictures of group activites loaded into worlds.
 
 ---
 
