@@ -30,7 +30,7 @@ def resize_image(input_path, output_path, max_dimension):
             resized_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
             # Save the resized image
-            resized_img.save(output_path)
+            resized_img.save(output_path, format='JPEG', subsampling=0, quality=95)
             print(f"Image resized and saved to {output_path}")
 
     except Exception as e:
@@ -173,8 +173,8 @@ if __name__ == "__main__":
             date_file.write(current_date)
         print(f"No date found in the input filename. Current date '{current_date}' written to 1.txt")
 
-    # Set the output path to 1.jpg
-    output_path = "1.jpg"
+    # Set the output path to 1.jpeg
+    output_path = "1.jpeg"
 
     # Resize the image
     resize_image(input_path, output_path, max_dimension)
@@ -188,10 +188,10 @@ if __name__ == "__main__":
         print("Files incremented successfully.")
     else:
         print("Failed to increment files. Continuing with upload...")
-    
-    # Upload the new files as 1.jpg and 1.txt
+
+    # Upload the new files as 1.jpeg and 1.txt
     print("Uploading new files...")
-    upload_to_bucket(bucket_name, "1.jpg", "1.jpg")
+    upload_to_bucket(bucket_name, "1.jpeg", "1.jpeg")
     upload_to_bucket(bucket_name, "1.txt", "1.txt")
 
     input("Press Enter to exit...")
