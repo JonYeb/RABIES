@@ -173,8 +173,8 @@ if __name__ == "__main__":
             date_file.write(current_date)
         print(f"No date found in the input filename. Current date '{current_date}' written to 1.txt")
 
-    # Set the output path to 1.jpeg
-    output_path = "1.jpeg"
+    # Set the output path to 1.jpg
+    output_path = "1.jpg"
 
     # Resize the image
     resize_image(input_path, output_path, max_dimension)
@@ -189,9 +189,9 @@ if __name__ == "__main__":
     else:
         print("Failed to increment files. Continuing with upload...")
 
-    # Upload the new files as 1.jpeg and 1.txt
+    # Upload the new files as 1.jpg and 1.txt
     print("Uploading new files...")
-    upload_to_bucket(bucket_name, "1.jpeg", "1.jpeg")
+    upload_to_bucket(bucket_name, "1.jpg", "1.jpg")
     upload_to_bucket(bucket_name, "1.txt", "1.txt")
 
     input("Press Enter to exit...")
